@@ -56,9 +56,6 @@ function buildMonthTicks() {
 
 const MONTH_TICKS = buildMonthTicks()
 
-/** Riesgos críticos reales (vacío = no mostrar como riesgo). */
-const PROJECT_RISKS = []
-
 function appendMonthGridLines(track) {
   MONTH_TICKS.forEach(tick => {
     if (tick.startPct <= 0) return
@@ -137,6 +134,21 @@ function isDaysWarning(days) {
 function renderMiniProgressBar(pct, vis = 'progress') {
   const w = Math.min(100, Math.max(0, pct))
   return `<div class="ms-progress ms-progress--mini"><div class="ms-progress-fill ms-progress-fill--${vis}" style="width:${w}%"></div></div>`
+}
+
+
+/** Ajusta anchos de segmentos para que sumen 100% (evita hueco al final de la barra). */
+function segmentWidthsPercent(segmentDefs, total) {
+  if (!segmentDefs.length || !total) return []
+  const widths = segmentDefs.map(s => Math.floor((s.n / total) * 100))
+  let slack = 100 - widths.reduce((a, b) => a + b, 0)
+  let i = 0
+  while (slack > 0) {
+    widths[i % widths.length] += 1
+    slack -= 1
+    i += 1
+  }
+  return widths
 }
 
 function milestoneStatusIcon(est) {
@@ -365,25 +377,6 @@ function renderExecutiveSection(insights, rfGlobal, completados, totalMilestones
   `
 }
 
-function renderContextSection() {
-  if (PROJECT_RISKS.length > 0) {
-    return `
-      <section class="context-card card-padded">
-        <h2 class="context-title context-title--risk">Riesgos actuales</h2>
-        <ul class="context-list">
-          ${PROJECT_RISKS.map(r => `<li>${r}</li>`).join('')}
-        </ul>
-      </section>
-    `
-  }
-  return `
-    <section class="context-card context-card--ok card-padded">
-      <h2 class="context-title">Riesgos</h2>
-      <p class="context-ok">Sin riesgos críticos</p>
-    </section>
-  `
-}
-
 /** Texto de avance en calendario (solo milestones activos). */
 function renderMilestoneTimeInfo(ms, est) {
   const key = estadoKey(est)
@@ -530,9 +523,10 @@ function renderRfProgressBar(stats) {
     stats.pendiente > 0 && { cls: 'rf-seg-pendiente', n: stats.pendiente, label: 'Pendientes' },
   ].filter(Boolean)
 
+  const widths = segmentWidthsPercent(segmentDefs, stats.total)
   const segsHtml = segmentDefs
-    .map(s => {
-      const w = pctRf(s.n)
+    .map((s, i) => {
+      const w = widths[i]
       const showLabel = w >= 10
       return `<div class="rf-progress-seg ${s.cls}" style="width:${w}%" title="${s.label}: ${s.n} (${w}%)">${showLabel ? `<span>${w}%</span>` : ''}</div>`
     })
@@ -956,10 +950,10 @@ function render(milestones) {
   main.appendChild(ganttLabel)
   main.appendChild(renderGantt(milestones, insights.actual))
 
-  const bottomGrid = document.createElement('div')
-  bottomGrid.className = 'dashboard-bottom-grid'
-  bottomGrid.innerHTML = `<div class="bottom-rf card-padded">${renderRfProgressBar(rfGlobal)}</div>${renderContextSection()}`
-  main.appendChild(bottomGrid)
+  const bottomRf = document.createElement('section')
+  bottomRf.className = 'bottom-rf card-padded'
+  bottomRf.innerHTML = renderRfProgressBar(rfGlobal)
+  main.appendChild(bottomRf)
 
   const listLabel = document.createElement('div')
   listLabel.className = 'section-label'
