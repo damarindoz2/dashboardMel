@@ -1,0 +1,1186 @@
+@import "tailwindcss";
+@import "@fontsource/geist-mono/400.css";
+@import "@fontsource/geist-mono/500.css";
+
+/* ─── LexMel design tokens (:root) ─── */
+:root {
+  /* Marca */
+  --lexmel-accent: #7a1419;
+  --lexmel-primary: #2c2a24;
+  --lexmel-secondary: #686154;
+  --lexmel-neutral: #f7f9fc;
+  --lexmel-background: #c0bdaa;
+
+  /* shadcn / semánticos (light) */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --primary: #7a1419;
+  --primary-foreground: #ffffff;
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #ffffff;
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  /* Sidebar */
+  --sidebar: #7a1419;
+  --sidebar-foreground: rgba(255, 255, 255, 0.8);
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #7a1419;
+  --sidebar-accent: rgba(255, 255, 255, 0.15);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.15);
+  --sidebar-ring: rgba(255, 255, 255, 0.25);
+  --sidebar-width: 220px;
+  --header-height: 48px;
+
+  /* Estado */
+  --success: #4aa862;
+  --success-foreground: #ffffff;
+  --success-muted: color-mix(in srgb, var(--success) 12%, white);
+  --success-border: color-mix(in srgb, var(--success) 32%, white);
+  --info: #3d6b9e;
+  --info-foreground: #ffffff;
+  --info-muted: color-mix(in srgb, var(--info) 14%, white);
+  --info-border: color-mix(in srgb, var(--info) 35%, white);
+  --danger: var(--destructive);
+  --danger-muted: color-mix(in srgb, var(--destructive) 12%, white);
+  --danger-border: color-mix(in srgb, var(--destructive) 32%, white);
+  --danger-dark: #5c1014;
+  --danger-dark-muted: color-mix(in srgb, var(--danger-dark) 14%, white);
+  --amber: #d97706;
+  --amber-muted: #fef3c7;
+  --amber-border: #fcd34d;
+  --color-text-success: var(--success);
+  --color-background-success: var(--success-muted);
+  --color-text-info: var(--info);
+  --color-background-info: var(--info-muted);
+  --color-text-warning: var(--amber);
+  --color-background-warning: var(--amber-muted);
+  --color-text-danger: var(--danger);
+  --color-background-danger: var(--danger-muted);
+  --color-text-danger-dark: var(--danger-dark);
+  --color-background-danger-dark: var(--danger-dark-muted);
+  /* En progreso → secundario marca; atrasados → accent */
+  --warning: var(--lexmel-secondary);
+  --warning-foreground: #ffffff;
+  --warning-muted: color-mix(in srgb, var(--lexmel-secondary) 14%, white);
+  --warning-border: color-mix(in srgb, var(--lexmel-secondary) 35%, white);
+
+  /* Radius */
+  --radius: 0.625rem;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.2);
+  --radius-2xl: calc(var(--radius) * 1.4);
+  --radius-3xl: calc(var(--radius) * 1.6);
+  --radius-4xl: calc(var(--radius) * 2);
+
+  /* Fuentes (variables para layout) */
+  --font-montserrat: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-lufga: var(--font-montserrat);
+  --font-geist-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+@theme inline {
+  --font-sans: var(--font-montserrat);
+  --font-heading: var(--font-lufga);
+  --font-mono: var(--font-geist-mono);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-lexmel-accent: var(--lexmel-accent);
+  --color-lexmel-primary: var(--lexmel-primary);
+  --color-lexmel-secondary: var(--lexmel-secondary);
+  --color-lexmel-neutral: var(--lexmel-neutral);
+  --color-lexmel-background: var(--lexmel-background);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-muted: var(--success-muted);
+  --color-success-border: var(--success-border);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-muted: var(--warning-muted);
+  --color-warning-border: var(--warning-border);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-3xl: var(--radius-3xl);
+  --radius-4xl: var(--radius-4xl);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-montserrat);
+  }
+
+  body {
+    @apply min-h-screen bg-lexmel-neutral font-sans text-sm text-foreground antialiased;
+  }
+}
+
+/* ─── Componentes (paridad con shadcn / LexMel app) ─── */
+
+@layer components {
+  .badge {
+    @apply inline-flex items-center rounded-4xl px-2.5 py-0.5 text-xs font-medium whitespace-nowrap;
+  }
+
+  .badge-success {
+    @apply bg-success text-success-foreground;
+  }
+
+  .badge-neutral {
+    @apply bg-lexmel-primary text-lexmel-neutral;
+  }
+
+  .badge-secondary {
+    @apply bg-secondary text-secondary-foreground;
+  }
+
+  .badge-warning {
+    @apply border border-warning-border bg-warning-muted font-medium text-lexmel-secondary;
+  }
+
+  .badge-atrasado {
+    @apply bg-lexmel-accent text-white;
+  }
+
+  .badge-destructive {
+    @apply bg-destructive text-destructive-foreground;
+  }
+
+  .badge-rf-completado {
+    background: var(--color-background-success);
+    color: var(--color-text-success);
+  }
+
+  .badge-rf-en-progreso {
+    background: var(--color-background-info);
+    color: var(--color-text-info);
+  }
+
+  .badge-rf-pendiente {
+    @apply bg-muted text-muted-foreground;
+  }
+
+  .badge-rf-atrasado {
+    background: var(--color-background-danger);
+    color: var(--color-text-danger);
+  }
+
+  .badge-rf-bloqueado {
+    background: var(--color-background-danger-dark);
+    color: var(--color-text-danger-dark);
+  }
+
+  .badge-rf-nuevo {
+    background: var(--color-background-warning);
+    color: var(--color-text-warning);
+    border: 1px solid var(--amber-border);
+  }
+
+  .badge-filter {
+    @apply border border-lexmel-accent/50 bg-background text-lexmel-accent;
+  }
+
+  .card {
+    @apply rounded-xl bg-card text-sm text-card-foreground ring-1 ring-foreground/10;
+  }
+
+  .card-padded {
+    @apply rounded-xl bg-card px-4 py-4 text-sm text-card-foreground ring-1 ring-foreground/10 sm:px-3 sm:py-3;
+  }
+
+  .section-label {
+    @apply mb-4 text-xs font-semibold tracking-wide text-foreground/75 uppercase;
+  }
+
+  .page-header-title {
+    @apply font-heading text-2xl font-bold leading-none tracking-tight text-foreground sm:text-4xl md:text-[40px];
+  }
+
+  .page-header-desc {
+    @apply text-base text-foreground/75;
+  }
+
+  /* Resumen ejecutivo */
+  .header-summary {
+    @apply mb-5 flex flex-col gap-2;
+  }
+
+  .header-metrics-card {
+    @apply flex flex-col overflow-hidden rounded-lg bg-card text-card-foreground ring-1 ring-foreground/10 sm:flex-row;
+  }
+
+  .header-metrics-cell {
+    @apply flex flex-1 flex-col px-4 py-3;
+  }
+
+  .header-metrics-cell:not(:last-child) {
+    @apply border-b border-border sm:border-r sm:border-b-0;
+  }
+
+  .header-metrics-label {
+    @apply mb-1.5 text-[0.65rem] font-semibold tracking-wide text-foreground/70 uppercase;
+  }
+
+  .header-metrics-value {
+    @apply font-heading text-2xl font-semibold leading-none sm:text-3xl;
+  }
+
+  .header-metrics-value strong {
+    @apply font-semibold;
+  }
+
+  .header-metrics-denom {
+    @apply text-lg font-light text-foreground/55 sm:text-xl;
+  }
+
+  .header-metrics-date {
+    @apply font-heading text-sm font-semibold leading-snug text-foreground sm:text-base;
+  }
+
+  .header-metrics-date--late {
+    @apply text-lexmel-accent;
+  }
+
+  .header-metrics-sub {
+    @apply mt-0.5 text-[0.7rem] leading-snug text-foreground/70;
+  }
+
+  .header-metrics-delta {
+    @apply font-medium text-lexmel-accent;
+  }
+
+  .header-metrics-status {
+    @apply mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-foreground;
+  }
+
+  .header-metrics-status--ok {
+    color: var(--color-text-success);
+  }
+
+  .header-metrics-status--riesgo {
+    color: var(--color-text-warning);
+  }
+
+  .header-metrics-status--atrasado {
+    @apply text-lexmel-accent;
+  }
+
+  .header-metrics-empty {
+    @apply text-sm text-foreground/70;
+  }
+
+  .header-metrics-card .ms-progress--mini {
+    @apply mt-2 h-1.5 w-full;
+  }
+
+  .trabajando-ahora-card {
+    @apply rounded-lg bg-card px-4 py-3 text-card-foreground ring-1 ring-foreground/10;
+  }
+
+  .trabajando-ahora-body {
+    @apply mt-2 flex flex-col gap-4 sm:flex-row sm:items-stretch sm:justify-between;
+  }
+
+  .trabajando-ahora-left {
+    @apply min-w-0 flex-1;
+  }
+
+  .trabajando-ahora-right {
+    @apply flex w-full shrink-0 flex-col justify-center sm:max-w-[220px] sm:border-l sm:border-border sm:pl-5;
+  }
+
+  .trabajando-ahora-code {
+    @apply text-[0.65rem] font-semibold tracking-wider text-muted-foreground uppercase;
+  }
+
+  .trabajando-ahora-name {
+    @apply font-heading text-base font-medium leading-snug text-foreground;
+  }
+
+  .trabajando-ahora-dates {
+    @apply mt-0.5 text-xs text-foreground/75;
+  }
+
+  .trabajando-ahora-days {
+    @apply mt-1 font-heading text-lg font-semibold text-foreground;
+  }
+
+  .trabajando-ahora-days--warning {
+    color: var(--color-text-warning);
+  }
+
+  .trabajando-ahora-rf-label {
+    @apply text-[0.65rem] font-semibold tracking-wide text-foreground/70 uppercase;
+  }
+
+  .trabajando-ahora-rf-value {
+    @apply font-heading text-2xl font-semibold leading-none;
+  }
+
+  .trabajando-ahora-rf-count {
+    @apply mt-0.5 text-xs text-foreground/70;
+  }
+
+  .trabajando-ahora-right .ms-progress--mini {
+    @apply mt-2 h-1.5 w-full;
+  }
+
+  .insight-card {
+    @apply rounded-lg bg-card px-3 py-2.5 text-xs text-card-foreground ring-1 ring-foreground/10;
+  }
+
+  .insight-label {
+    @apply mb-1 text-[0.65rem] font-semibold tracking-wide text-foreground/70 uppercase;
+  }
+
+  .insight-status {
+    @apply flex items-center gap-1.5 font-heading text-lg font-semibold leading-tight text-foreground;
+  }
+
+  .insight-status-icon {
+    @apply inline-flex h-5 w-5 shrink-0 items-center justify-center;
+  }
+
+  .insight-status-icon svg {
+    @apply h-4 w-4;
+  }
+
+  .insight-status-icon--ok {
+    color: var(--color-text-success);
+  }
+
+  .insight-status-icon--riesgo {
+    color: var(--color-text-warning);
+  }
+
+  .insight-status-icon--atrasado {
+    @apply text-lexmel-accent;
+  }
+
+  .insight-card--ok {
+    @apply border-l-4 border-success;
+  }
+
+  .insight-card--riesgo {
+    @apply border-l-4 border-amber-500;
+  }
+
+  .insight-card--atrasado {
+    @apply border-l-4 border-lexmel-accent;
+  }
+
+  .insight-line {
+    @apply text-xs leading-snug text-foreground/85;
+  }
+
+  .insight-card--delivery .insight-line {
+    @apply text-sm leading-relaxed;
+  }
+
+  .insight-card--delivery-ok .insight-line--hero {
+    @apply text-sm leading-snug text-foreground/85;
+  }
+
+  .insight-card--delivery-ok .insight-line--hero strong {
+    @apply font-heading text-xl font-semibold leading-tight text-foreground sm:text-2xl;
+  }
+
+  .insight-card--delivery .insight-delta {
+    @apply text-xs;
+  }
+
+  .insight-line strong {
+    @apply font-semibold text-foreground;
+  }
+
+  .insight-line--late strong {
+    @apply text-lexmel-accent;
+  }
+
+  .insight-delta {
+    @apply text-[0.65rem] font-medium text-lexmel-accent;
+  }
+
+  .insight-kpi {
+    @apply text-xs text-foreground/85;
+  }
+
+  .insight-kpi strong {
+    @apply font-heading text-lg font-semibold text-foreground;
+  }
+
+  .insight-kpi--late strong {
+    @apply text-lexmel-accent;
+  }
+
+  .insight-kpi--ok strong {
+    @apply text-success;
+  }
+
+  .insight-next-code {
+    @apply text-[0.65rem] font-semibold tracking-wider text-muted-foreground uppercase;
+  }
+
+  .insight-next-name {
+    @apply font-heading text-sm font-medium leading-snug text-foreground;
+  }
+
+  .insight-next-date {
+    @apply mt-0.5 text-xs font-medium text-foreground/80;
+  }
+
+  .insight-muted {
+    @apply text-[0.7rem] leading-snug text-foreground/70;
+  }
+
+  .risks-section {
+    @apply mb-8;
+  }
+
+  .risks-title {
+    @apply mb-3 text-xs font-semibold tracking-wide text-foreground/75 uppercase;
+  }
+
+  .risks-list {
+    @apply m-0 list-disc space-y-2 pl-5 text-sm leading-relaxed text-foreground/85;
+  }
+
+  .executive-narrative {
+    @apply mb-5 text-sm leading-relaxed text-foreground/90;
+  }
+
+  .executive-narrative.card-padded {
+    @apply rounded-lg px-3 py-2.5;
+  }
+
+  .executive-narrative strong {
+    @apply font-semibold text-foreground;
+  }
+
+  .insight-card--avance .insight-kpi strong {
+    @apply font-heading text-3xl font-semibold text-success sm:text-4xl;
+  }
+
+  .insight-card--avance-ok .insight-kpi strong {
+    @apply text-4xl sm:text-5xl;
+  }
+
+  .insight-card--kpi .insight-kpi--hero {
+    @apply mt-0 leading-none;
+  }
+
+  .insight-card--rf .insight-kpi--hero strong {
+    @apply font-heading text-3xl font-semibold sm:text-4xl;
+  }
+
+  .insight-card--modulos .insight-kpi--hero strong {
+    @apply font-heading text-2xl font-semibold sm:text-3xl;
+  }
+
+  .insight-card--rf .insight-kpi-denom {
+    @apply text-xl font-light text-foreground/55 sm:text-2xl;
+  }
+
+  .insight-kpi-denom {
+    @apply text-lg font-light text-foreground/55 sm:text-xl;
+  }
+
+  .insight-card--rf {
+    @apply bg-muted/40;
+  }
+
+  .insight-card--modulos .ms-progress--mini {
+    @apply mt-1.5 h-1;
+  }
+
+  .dashboard-bottom-grid {
+    @apply mb-10 grid gap-3 lg:grid-cols-[1.4fr_0.6fr];
+  }
+
+  .context-card {
+    @apply h-full rounded-xl bg-card text-sm ring-1 ring-foreground/10;
+  }
+
+  .context-card--ok {
+    @apply border-l-4 border-success;
+  }
+
+  .context-title {
+    @apply mb-3 text-xs font-semibold tracking-wide text-foreground/75 uppercase;
+  }
+
+  .context-title--risk {
+    @apply text-lexmel-accent;
+  }
+
+  .context-list {
+    @apply m-0 list-disc space-y-2 pl-5 leading-relaxed text-foreground/85;
+  }
+
+  .context-ok {
+    @apply font-medium text-success;
+  }
+
+  /* Métricas legacy */
+  .metrics {
+    @apply mb-10 grid grid-cols-2 gap-3 lg:grid-cols-5;
+  }
+
+  .metric {
+    @apply rounded-xl bg-card px-4 py-4 text-sm text-card-foreground ring-1 ring-foreground/10 sm:px-3 sm:py-3;
+  }
+
+  .metric-label {
+    @apply mb-1 text-[0.65rem] font-semibold uppercase tracking-wide text-foreground/70;
+  }
+
+  .metric-value {
+    @apply font-heading text-2xl font-light text-foreground;
+  }
+
+  .metric-value--md {
+    @apply text-3xl font-medium;
+  }
+
+  .metric-value--hero {
+    @apply text-2xl font-semibold leading-none sm:text-3xl;
+  }
+
+  .metric-value-denom {
+    @apply text-lg font-light text-foreground/55 sm:text-xl;
+  }
+
+  .metric-sub {
+    @apply mt-1 text-[0.7rem] leading-snug text-foreground/70;
+  }
+
+  .metric-wide {
+    @apply col-span-2 lg:col-span-1;
+  }
+
+  @media (max-width: 1023px) {
+    .metric-wide {
+      @apply col-span-2;
+    }
+  }
+
+  /* App shell */
+  .app-header {
+    @apply sticky top-0 z-50 flex items-end justify-between border-b border-sidebar-border bg-sidebar px-4 py-6 sm:px-6 lg:px-10;
+  }
+
+  .app-main {
+    @apply mx-auto max-w-6xl space-y-10 px-4 py-6 sm:px-6 lg:px-10;
+  }
+
+  /* Gantt */
+  .gantt-wrap {
+    @apply overflow-x-auto rounded-xl bg-card p-6 text-sm text-card-foreground ring-1 ring-foreground/10;
+  }
+
+  .gantt-wrap--large {
+    @apply p-8;
+  }
+
+  .section-label--timeline {
+    @apply text-sm font-semibold text-foreground;
+  }
+
+  .gantt-months {
+    @apply mb-3 grid grid-cols-[220px_1fr];
+  }
+
+  .gantt-rows {
+    @apply relative grid;
+  }
+
+  .gantt-today-overlay {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 220px;
+    z-index: 10;
+  }
+
+  .gantt-today-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--today-pct);
+    transform: translateX(-50%);
+  }
+
+  .gantt-today-label {
+    display: none;
+  }
+
+  .gantt-months-track {
+    @apply relative h-6;
+  }
+
+  .month-tick {
+    @apply absolute -translate-x-1/2 text-xs font-medium tracking-wide whitespace-nowrap text-foreground/70;
+  }
+
+  .gantt-row {
+    @apply mb-2 grid grid-cols-[220px_1fr] items-center;
+  }
+
+  .gantt-row--done {
+    @apply opacity-45;
+  }
+
+  .gantt-row--current .gantt-label strong {
+    @apply text-lexmel-accent;
+  }
+
+  .gantt-label {
+    @apply truncate pr-3 text-sm leading-snug text-foreground/75;
+  }
+
+  .gantt-label strong {
+    @apply block text-sm font-semibold text-foreground;
+  }
+
+  .gantt-label-name {
+    @apply block truncate text-xs text-foreground/65;
+  }
+
+  .gantt-actual-tag {
+    @apply mt-0.5 inline-block rounded px-1.5 py-px text-[0.58rem] font-bold tracking-wide text-white uppercase bg-lexmel-secondary;
+  }
+
+  .gantt-track {
+    @apply relative h-[26px] rounded-md bg-muted;
+  }
+
+  .gantt-track--large {
+    @apply h-10 rounded-lg bg-muted/80;
+  }
+
+  .month-grid-line {
+    @apply pointer-events-none absolute top-0 bottom-0 z-0 w-px bg-border/80;
+  }
+
+  .gantt-bar {
+    @apply absolute flex h-full cursor-pointer items-center overflow-hidden rounded-md px-2 text-xs font-semibold whitespace-nowrap shadow-sm transition-[filter,transform,box-shadow] hover:brightness-95;
+  }
+
+  .gantt-bar--current {
+    @apply z-[2] ring-2 ring-lexmel-secondary ring-offset-2 ring-offset-card shadow-md;
+  }
+
+  .gantt-bar--done {
+    @apply bg-success text-success-foreground;
+  }
+
+  .gantt-bar--progress {
+    @apply bg-lexmel-secondary text-white;
+  }
+
+  .gantt-bar--atrasado {
+    @apply bg-lexmel-accent text-white;
+  }
+
+  .gantt-bar--pending {
+    @apply bg-muted-foreground/35 text-lexmel-primary;
+  }
+
+  .today-line {
+    @apply absolute -top-0.5 -bottom-0.5 z-[5] w-0.5 rounded-sm bg-destructive;
+  }
+
+  .today-label {
+    @apply absolute -top-4 -translate-x-1/2 text-[0.6rem] font-medium tracking-wide whitespace-nowrap text-destructive;
+  }
+
+  .legend {
+    @apply mt-5 flex flex-wrap gap-5;
+  }
+
+  .legend-item {
+    @apply flex items-center gap-1.5 text-xs text-muted-foreground;
+  }
+
+  .legend-dot {
+    @apply h-2.5 w-2.5 shrink-0 rounded-sm;
+  }
+
+  /* Milestone rows (horizontal + collapsible) */
+  .milestones-list-wrap {
+    @apply space-y-3;
+  }
+
+  .milestones-list {
+    @apply flex flex-col gap-2;
+  }
+
+  .ms-filters {
+    @apply mb-3 flex flex-wrap gap-2;
+  }
+
+  .ms-filter {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground/80 transition-colors hover:bg-muted/50;
+  }
+
+  .ms-filter--active {
+    @apply border-lexmel-secondary bg-lexmel-secondary text-white;
+  }
+
+  .ms-filter--active .ms-filter-count {
+    @apply bg-white/20 text-white;
+  }
+
+  .ms-filter-count {
+    @apply rounded-full bg-muted px-1.5 py-px text-[0.65rem] font-semibold text-foreground/70;
+  }
+
+  .ms-filter-empty {
+    @apply rounded-xl border border-dashed border-border bg-muted/20 px-4 py-8 text-center text-sm text-foreground/70;
+  }
+
+  .ms-row {
+    @apply relative overflow-hidden rounded-xl bg-card text-sm text-card-foreground ring-1 ring-foreground/10;
+  }
+
+  .ms-row::before {
+    content: "";
+    @apply absolute top-0 bottom-0 left-0 w-1;
+  }
+
+  .ms-row--done::before {
+    @apply bg-success;
+  }
+
+  .ms-row--progress::before {
+    @apply bg-lexmel-secondary;
+  }
+
+  .ms-row--atrasado {
+    @apply ring-lexmel-accent/35;
+  }
+
+  .ms-row--atrasado::before {
+    @apply bg-lexmel-accent;
+  }
+
+  .ms-row--actual {
+    @apply shadow-md ring-2 ring-lexmel-secondary/40;
+  }
+
+  .ms-row--actual::before {
+    @apply w-1.5 bg-lexmel-secondary;
+  }
+
+  .ms-actual-tag {
+    @apply shrink-0 rounded px-1.5 py-px text-[0.58rem] font-bold tracking-wide text-white uppercase bg-lexmel-secondary;
+  }
+
+  .ms-row--pending::before {
+    @apply bg-border;
+  }
+
+  .ms-row-summary {
+    @apply relative flex cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-2 py-3 pr-4 pl-5 transition-colors hover:bg-muted/35 sm:flex-nowrap sm:gap-x-4;
+  }
+
+  .ms-row-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .ms-row-chevron {
+    @apply mr-1 h-2 w-2 shrink-0 rotate-0 border-r-2 border-b-2 border-muted-foreground transition-transform duration-200;
+    transform: rotate(-45deg);
+  }
+
+  .ms-row[open] .ms-row-chevron {
+    transform: rotate(45deg);
+  }
+
+  .ms-row-main {
+    @apply flex min-w-[140px] flex-1 items-center gap-2 sm:min-w-[200px] sm:gap-3;
+  }
+
+  .ms-row-ident {
+    @apply flex min-w-0 flex-1 flex-nowrap items-center gap-x-2;
+  }
+
+  .ms-row-title {
+    @apply flex min-w-0 flex-1 items-baseline gap-x-2 overflow-hidden;
+  }
+
+  .ms-code {
+    @apply shrink-0 text-xs font-medium tracking-wider text-muted-foreground uppercase;
+  }
+
+  .ms-name {
+    @apply min-w-0 truncate font-heading text-sm font-medium text-foreground;
+  }
+
+  .ms-row-mid {
+    @apply flex shrink-0 flex-col gap-0.5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:gap-3;
+  }
+
+  .ms-dates {
+    @apply whitespace-nowrap;
+  }
+
+  .ms-rf-pill {
+    @apply w-fit rounded-full bg-muted px-2 py-0.5 text-[0.65rem] font-medium text-foreground/80;
+  }
+
+  .ms-row-time {
+    @apply shrink-0 text-xs;
+  }
+
+  .ms-time-info {
+    @apply whitespace-nowrap text-muted-foreground;
+  }
+
+  .ms-time-info--atrasado {
+    @apply font-medium text-lexmel-accent;
+  }
+
+  .ms-time-info--warning {
+    color: var(--color-text-warning);
+    @apply font-semibold;
+  }
+
+  .ms-status-icon {
+    @apply inline-flex h-4 w-4 shrink-0 items-center justify-center;
+  }
+
+  .ms-status-icon--done {
+    color: var(--color-text-success);
+  }
+
+  .ms-status-icon--done svg {
+    @apply h-3.5 w-3.5;
+  }
+
+  .ms-status-icon--progress .ms-status-dot {
+    @apply block h-2.5 w-2.5 rounded-full bg-lexmel-secondary;
+  }
+
+  .ms-status-icon--atrasado .ms-status-dot {
+    @apply block h-2.5 w-2.5 rounded-full bg-lexmel-accent;
+  }
+
+  .ms-status-icon--pending .ms-status-dot {
+    @apply block h-2.5 w-2.5 rounded-full border-2 border-muted-foreground/50 bg-transparent;
+  }
+
+  .ms-progress {
+    @apply h-1 overflow-hidden rounded-sm bg-muted;
+  }
+
+  .ms-progress--mini {
+    @apply mt-2 h-1.5 w-full;
+  }
+
+  .ms-progress-fill {
+    @apply h-full rounded-sm transition-[width] duration-300;
+  }
+
+  .ms-progress-fill--done {
+    @apply bg-success;
+  }
+
+  .ms-progress-fill--progress {
+    @apply bg-lexmel-secondary;
+  }
+
+  .ms-progress-fill--atrasado {
+    @apply bg-lexmel-accent;
+  }
+
+  .ms-progress-fill--pending {
+    @apply bg-muted-foreground/35;
+  }
+
+  .insight-proxima-days {
+    @apply mt-0.5 font-heading text-xl font-semibold leading-none text-foreground sm:text-2xl;
+  }
+
+  .insight-proxima-days--warning {
+    color: var(--color-text-warning);
+  }
+
+  .insight-proxima-meta {
+    @apply mt-0.5 text-xs text-foreground/75;
+  }
+
+  .modal-rf-progress {
+    @apply mb-3;
+  }
+
+  .modal-rf-progress .ms-progress {
+    @apply mb-2 h-2;
+  }
+
+  .ms-row-body {
+    @apply border-t border-border px-4 pt-2 pb-3 pl-5;
+  }
+
+  .ms-row-body .rf-list {
+    @apply max-h-52;
+  }
+
+  .ms-detail-btn {
+    @apply ml-auto shrink-0 rounded-md border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-foreground/20 hover:bg-muted hover:text-foreground;
+  }
+
+  .ms-meta {
+    @apply flex shrink-0 gap-3 text-xs text-muted-foreground;
+  }
+
+  /* RF progress */
+  .rf-progress-wrap {
+    @apply my-3;
+  }
+
+  .rf-progress-wrap--enhanced {
+    @apply my-0;
+  }
+
+  .rf-progress-label {
+    @apply mb-2 text-xs font-semibold tracking-wide text-foreground/75 uppercase;
+  }
+
+  .rf-progress-bar {
+    @apply mb-2 flex h-2 overflow-hidden rounded-full border border-border bg-muted/60;
+  }
+
+  .rf-progress-bar--tall {
+    @apply h-5 rounded-lg;
+  }
+
+  .rf-progress-seg {
+    @apply flex h-full min-w-0 items-center justify-center text-[0.62rem] font-bold text-white transition-[width] duration-300;
+  }
+
+  .rf-progress-legend {
+    @apply flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground/75;
+  }
+
+  .rf-legend-item {
+    @apply inline-flex items-center gap-1.5;
+  }
+
+  .rf-legend-swatch {
+    @apply h-2.5 w-2.5 shrink-0 rounded-sm;
+  }
+
+  .rf-seg-completado {
+    @apply bg-success;
+  }
+
+  .rf-seg-atrasado {
+    @apply bg-lexmel-accent;
+  }
+
+  .rf-seg-en-progreso {
+    @apply bg-lexmel-secondary;
+  }
+
+  .rf-seg-pendiente {
+    @apply bg-foreground/25 text-foreground/80;
+  }
+
+  .rf-progress-summary {
+    @apply text-sm leading-relaxed text-foreground/80;
+  }
+
+  .rf-progress-summary strong {
+    @apply font-medium text-foreground;
+  }
+
+  .rf-stat-atrasado {
+    @apply text-lexmel-accent;
+  }
+
+  .rf-stat-en-progreso {
+    @apply text-lexmel-secondary;
+  }
+
+  .rf-list {
+    @apply m-0 max-h-40 list-none overflow-y-auto rounded-lg border border-border bg-muted/30 p-0;
+  }
+
+  .rf-list-compact {
+    @apply max-h-[160px];
+  }
+
+  .rf-item {
+    @apply grid grid-cols-[52px_1fr_auto] items-center gap-2 border-b border-border px-2.5 py-1.5 text-xs last:border-b-0;
+  }
+
+  .rf-codigo {
+    @apply font-medium tracking-wide text-muted-foreground;
+  }
+
+  .rf-nombre {
+    @apply truncate text-foreground;
+  }
+
+  .rf-nombre--full {
+    @apply col-span-3 truncate;
+  }
+
+  .rf-item--entregable {
+    @apply grid-cols-1;
+  }
+
+  .entregables-list .rf-item--entregable {
+    @apply py-2;
+  }
+
+  .rf-empty {
+    @apply py-2 text-xs text-muted-foreground italic;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    @apply fixed inset-0 z-[200] flex items-center justify-center bg-foreground/45 p-8;
+  }
+
+  .modal {
+    @apply max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-card text-sm text-card-foreground ring-1 ring-foreground/10;
+  }
+
+  .modal-header {
+    @apply border-b border-border px-8 pt-7 pb-5;
+  }
+
+  .modal-header-top {
+    @apply mb-2 flex items-center justify-between gap-4;
+  }
+
+  .modal-code {
+    @apply text-xs tracking-widest text-muted-foreground uppercase;
+  }
+
+  .modal-title {
+    @apply font-heading text-2xl font-medium leading-tight;
+  }
+
+  .modal-close {
+    @apply -mr-1 shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground;
+  }
+
+  .modal-body {
+    @apply px-8 py-6;
+  }
+
+  .modal-row {
+    @apply mb-5 grid grid-cols-2 gap-3;
+  }
+
+  .modal-field-label {
+    @apply mb-0.5 text-xs tracking-wide text-muted-foreground uppercase;
+  }
+
+  .modal-field-value {
+    @apply text-sm text-foreground;
+  }
+
+  .modal-divider {
+    @apply my-5 border-0 border-t border-border;
+  }
+
+  .modal-section-label {
+    @apply mb-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase;
+  }
+
+  .modal-objetivo {
+    @apply text-sm leading-relaxed text-muted-foreground;
+  }
+
+  .modal-entregables {
+    @apply mt-1 flex flex-wrap gap-1.5;
+  }
+
+  .entregable-tag {
+    @apply rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground;
+  }
+
+  /* Loader / error */
+  .loader {
+    @apply flex h-screen items-center justify-center gap-2;
+  }
+
+  .loader-dot {
+    @apply h-2 w-2 animate-pulse rounded-full bg-muted-foreground/50;
+  }
+
+  .loader-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .loader-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  .error-state {
+    @apply flex h-[60vh] flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground;
+  }
+}
+
+@media (max-width: 768px) {
+  .gantt-months,
+  .gantt-row {
+    grid-template-columns: 140px 1fr;
+  }
+
+  .gantt-today-overlay {
+    left: 140px;
+  }
+}

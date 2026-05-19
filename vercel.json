@@ -1,0 +1,6 @@
+{
+  "buildCommand": "cd lexmel-client && pnpm install && pnpm run build",
+  "outputDirectory": "lexmel-client/dist",
+  "installCommand": "cd lexmel-client && pnpm install",
+  "framework": "vite"
+}
