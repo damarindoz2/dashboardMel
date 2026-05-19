@@ -652,6 +652,31 @@
     @apply p-8;
   }
 
+  .gantt-section-header {
+    @apply mb-3 flex items-center gap-2;
+  }
+
+  .gantt-header-info {
+    @apply relative inline-flex h-5 w-5 shrink-0 cursor-help items-center justify-center rounded-full border-0 bg-transparent p-0 text-foreground/55 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lexmel-secondary;
+  }
+
+  .gantt-header-info svg {
+    @apply h-4 w-4;
+  }
+
+  .gantt-header-tooltip {
+    @apply pointer-events-none invisible absolute top-full left-1/2 z-50 mt-2 w-[min(18rem,calc(100vw-2rem))] -translate-x-1/2 rounded-md border border-border bg-card px-3 py-2 text-left text-xs leading-snug font-normal text-foreground/80 opacity-0 shadow-md transition-opacity;
+  }
+
+  .gantt-header-tooltip strong {
+    @apply font-semibold text-foreground;
+  }
+
+  .gantt-header-info:hover .gantt-header-tooltip,
+  .gantt-header-info:focus-visible .gantt-header-tooltip {
+    @apply visible opacity-100;
+  }
+
   .gantt-chart-body {
     --gantt-labels-band: 1.75rem;
     position: relative;
@@ -729,6 +754,32 @@
   .gantt-marker-line--mvp {
     width: 0;
     border-left: 2px dashed var(--amber);
+  }
+
+  .gantt-marker-line--mvp-plan {
+    width: 0;
+    border-left: 2px dashed color-mix(in srgb, var(--amber) 35%, transparent);
+    opacity: 0.65;
+  }
+
+  .gantt-marker-line--projected-end {
+    width: 2px;
+    border-radius: 1px;
+    background: color-mix(in srgb, var(--lexmel-accent) 55%, var(--amber));
+  }
+
+  .gantt-marker-label--projected-end {
+    @apply text-[0.58rem] font-semibold;
+    color: var(--lexmel-accent);
+  }
+
+  .gantt-bar--plan-ghost {
+    @apply z-[1] border border-dashed border-foreground/25 bg-transparent opacity-55;
+    box-shadow: none;
+  }
+
+  .gantt-bar--shifted.gantt-bar--atrasado {
+    @apply ring-1 ring-lexmel-accent/40;
   }
 
   .gantt-months {
@@ -839,6 +890,15 @@
     border: none;
     border-left: 2px dashed var(--amber);
     box-sizing: content-box;
+  }
+
+  .legend-dot.legend-dot--plan-ghost {
+    @apply h-2.5 w-5 rounded-sm border border-dashed border-foreground/30 bg-transparent;
+  }
+
+  .legend-dot.legend-dot--projected-end {
+    @apply h-2.5 w-0.5 rounded-sm;
+    background: color-mix(in srgb, var(--lexmel-accent) 55%, var(--amber));
   }
 
   /* Milestone rows (horizontal + collapsible) */

@@ -26,14 +26,18 @@ function getToday() {
 }
 
 /** Etiquetas de mes centradas en la porción visible del mes dentro del proyecto. */
-function buildMonthTicks() {
+function buildMonthTicksFor(endDate = PROJECT_END) {
   const ticks = []
+  const end = parseDay(endDate)
   const startMs = PROJECT_START.getTime()
-  const endMs = PROJECT_END.getTime()
+  const endMs = end.getTime()
+  const span = endMs - startMs
+  if (span <= 0) return ticks
+
   let y = PROJECT_START.getFullYear()
   let m = PROJECT_START.getMonth()
-  const endY = PROJECT_END.getFullYear()
-  const endM = PROJECT_END.getMonth()
+  const endY = end.getFullYear()
+  const endM = end.getMonth()
 
   while (y < endY || (y === endY && m <= endM)) {
     const monthStart = new Date(y, m, 1, 12, 0, 0)
@@ -44,8 +48,8 @@ function buildMonthTicks() {
       const centerMs = (segStart + segEnd) / 2
       ticks.push({
         label: monthStart.toLocaleDateString('es-MX', { month: 'short' }),
-        centerPct: ((centerMs - startMs) / PROJECT_SPAN) * 100,
-        startPct: ((segStart - startMs) / PROJECT_SPAN) * 100,
+        centerPct: ((centerMs - startMs) / span) * 100,
+        startPct: ((segStart - startMs) / span) * 100,
       })
     }
     m++
@@ -54,16 +58,63 @@ function buildMonthTicks() {
   return ticks
 }
 
-const MONTH_TICKS = buildMonthTicks()
+const MONTH_TICKS = buildMonthTicksFor(PROJECT_END)
 
-function appendMonthGridLines(track) {
-  MONTH_TICKS.forEach(tick => {
+function appendMonthGridLines(track, ticks = MONTH_TICKS) {
+  ticks.forEach(tick => {
     if (tick.startPct <= 0) return
     const line = document.createElement('div')
     line.className = 'month-grid-line'
     line.style.left = tick.startPct + '%'
     track.appendChild(line)
   })
+}
+
+function getGanttTimeline(retrasoDias) {
+  const end = retrasoDias > 0 ? addCalendarDays(PROJECT_END, retrasoDias) : PROJECT_END
+  return {
+    start: PROJECT_START,
+    end,
+    retrasoDias,
+    nuevaFecha: end,
+  }
+}
+
+/** % en el eje del Gantt (puede extenderse si hay atraso acumulado). */
+function ganttPct(date, timeline) {
+  const t = parseDay(date).getTime()
+  const span = timeline.end.getTime() - timeline.start.getTime()
+  if (span <= 0) return 0
+  return Math.max(0, Math.min(100, ((t - timeline.start.getTime()) / span) * 100))
+}
+
+/** Barra inclusive en el eje del Gantt. */
+function ganttBarRange(fechaInicio, fechaFin, timeline) {
+  if (!fechaInicio || !fechaFin) return { left: 0, width: 0 }
+  const start = parseDay(fechaInicio)
+  const endExclusive = parseDay(fechaFin)
+  endExclusive.setDate(endExclusive.getDate() + 1)
+  const left = ganttPct(start, timeline)
+  const right = ganttPct(endExclusive, timeline)
+  return { left, width: Math.max(0.35, right - left) }
+}
+
+function getGanttMilestoneDates(ms, retrasoDias) {
+  const done = estadoKey(milestoneEstado(ms)) === 'done'
+  if (done || !retrasoDias) {
+    return {
+      inicio: ms.fecha_inicio,
+      fin: ms.fecha_fin,
+      planInicio: null,
+      planFin: null,
+    }
+  }
+  return {
+    inicio: ms.fecha_inicio ? addCalendarDays(ms.fecha_inicio, retrasoDias) : null,
+    fin: ms.fecha_fin ? addCalendarDays(ms.fecha_fin, retrasoDias) : null,
+    planInicio: ms.fecha_inicio,
+    planFin: ms.fecha_fin,
+  }
 }
 
 /** % en el eje del proyecto [PROJECT_START … PROJECT_END]. */
@@ -1028,14 +1079,57 @@ function mvpMilestoneBadgeHtml(codigo) {
     : ''
 }
 
-function renderGantt(milestones, milestoneActual) {
+function ganttInfoIconSvg() {
+  return `<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 5h.01" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`
+}
+
+function appendGanttSectionHeader(parent, retrasoDias, nuevaFecha) {
+  const header = document.createElement('div')
+  header.className = 'gantt-section-header'
+
+  const title = document.createElement('div')
+  title.className = 'section-label section-label--timeline'
+  title.textContent = retrasoDias > 0
+    ? `Timeline del proyecto · plan contractual + ${retrasoDias} días de atraso`
+    : 'Timeline del proyecto · Ene – Nov 2026'
+  header.appendChild(title)
+
+  if (retrasoDias > 0) {
+    const info = document.createElement('button')
+    info.className = 'gantt-header-info'
+    info.type = 'button'
+    info.setAttribute('aria-label', 'Detalle del desplazamiento del cronograma')
+
+    const tooltip = document.createElement('div')
+    tooltip.className = 'gantt-header-tooltip'
+    tooltip.setAttribute('role', 'tooltip')
+    tooltip.innerHTML = `Cronograma desplazado <strong>+${retrasoDias} días</strong> por atrasos acumulados. Barras punteadas = plan contractual · barras sólidas = fechas reprogramadas. Entrega proyectada: <strong>${fmtDate(nuevaFecha)}</strong>.`
+
+    info.innerHTML = ganttInfoIconSvg()
+    info.appendChild(tooltip)
+    header.appendChild(info)
+  }
+
+  parent.appendChild(header)
+}
+
+function renderGantt(milestones, milestoneActual, insights = null) {
   const wrap = document.createElement('div')
   wrap.className = 'gantt-wrap gantt-wrap--large'
 
+  const retrasoDias = insights?.retrasoAcumulado ?? computeRetrasoAcumulado(milestones)
+  const timeline = getGanttTimeline(retrasoDias)
+  const monthTicks = buildMonthTicksFor(timeline.end)
+  const hasDelay = retrasoDias > 0
+
   const today = getToday()
-  const todayPct = projectPct(today)
-  const mvpPct = projectPct(MVP_FECHA_FIN)
+  const todayPct = ganttPct(today, timeline)
+  const mvpFechaProyectada = hasDelay ? addCalendarDays(MVP_FECHA_FIN, retrasoDias) : MVP_FECHA_FIN
+  const mvpPct = ganttPct(mvpFechaProyectada, timeline)
+  const mvpPlanPct = hasDelay ? ganttPct(MVP_FECHA_FIN, timeline) : null
+  const entregaProyectadaPct = hasDelay ? ganttPct(timeline.nuevaFecha, timeline) : null
   const todayLabelText = `hoy · ${today.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}`
+
 
   const chartBody = document.createElement('div')
   chartBody.className = 'gantt-chart-body'
@@ -1053,11 +1147,20 @@ function renderGantt(milestones, milestoneActual) {
 
   const mvpLabel = document.createElement('div')
   mvpLabel.className = 'gantt-marker-label gantt-marker-label--mvp'
-  mvpLabel.textContent = MVP_MARKER_LABEL
+  mvpLabel.textContent = hasDelay ? `${MVP_MARKER_LABEL} (reprog.)` : MVP_MARKER_LABEL
   positionGanttMarkerLabel(mvpLabel, mvpPct)
 
   labelsTrack.appendChild(todayLabel)
   labelsTrack.appendChild(mvpLabel)
+
+  if (hasDelay && entregaProyectadaPct != null) {
+    const entregaLabel = document.createElement('div')
+    entregaLabel.className = 'gantt-marker-label gantt-marker-label--projected-end'
+    entregaLabel.textContent = `Entrega +${retrasoDias}d`
+    positionGanttMarkerLabel(entregaLabel, entregaProyectadaPct)
+    labelsTrack.appendChild(entregaLabel)
+  }
+
   labelsRow.appendChild(labelsTrack)
   chartBody.appendChild(labelsRow)
 
@@ -1066,7 +1169,7 @@ function renderGantt(milestones, milestoneActual) {
   monthsRow.appendChild(document.createElement('div'))
   const monthsTrack = document.createElement('div')
   monthsTrack.className = 'gantt-months-track'
-  MONTH_TICKS.forEach(tick => {
+  monthTicks.forEach(tick => {
     const el = document.createElement('div')
     el.className = 'month-tick'
     el.style.left = tick.centerPct + '%'
@@ -1084,6 +1187,7 @@ function renderGantt(milestones, milestoneActual) {
     const vis = visualClass(est)
     const isActual = milestoneActual?.id === ms.id
     const isDone = vis === 'done'
+    const dates = getGanttMilestoneDates(ms, retrasoDias)
 
     const row = document.createElement('div')
     row.className = [
@@ -1098,22 +1202,30 @@ function renderGantt(milestones, milestoneActual) {
 
     const gTrack = document.createElement('div')
     gTrack.className = 'gantt-track gantt-track--large'
-    appendMonthGridLines(gTrack)
+    appendMonthGridLines(gTrack, monthTicks)
 
-    const { left, width } = milestoneBarRange(ms.fecha_inicio, ms.fecha_fin)
+    if (dates.planInicio && dates.planFin) {
+      const plan = ganttBarRange(dates.planInicio, dates.planFin, timeline)
+      const planBar = document.createElement('div')
+      planBar.className = 'gantt-bar gantt-bar--plan-ghost'
+      planBar.style.left = plan.left + '%'
+      planBar.style.width = plan.width + '%'
+      planBar.setAttribute('aria-hidden', 'true')
+      gTrack.appendChild(planBar)
+    }
 
+    const { left, width } = ganttBarRange(dates.inicio, dates.fin, timeline)
     const bar = document.createElement('div')
-    bar.className = `gantt-bar gantt-bar--${vis}${isActual ? ' gantt-bar--current' : ''}`
+    bar.className = `gantt-bar gantt-bar--${vis}${isActual ? ' gantt-bar--current' : ''}${hasDelay && dates.planFin ? ' gantt-bar--shifted' : ''}`
     bar.style.left = left + '%'
     bar.style.width = width + '%'
     bar.textContent = width > 5 ? ms.codigo : ''
     bar.addEventListener('click', () => openModal(ms))
-
     gTrack.appendChild(bar)
+
     row.appendChild(label)
     row.appendChild(gTrack)
     rowsTrack.appendChild(row)
-
   })
 
   const markersOverlay = document.createElement('div')
@@ -1124,10 +1236,24 @@ function renderGantt(milestones, milestoneActual) {
   todayLine.style.left = `${todayPct}%`
   markersOverlay.appendChild(todayLine)
 
+  if (hasDelay && mvpPlanPct != null) {
+    const mvpPlanLine = document.createElement('div')
+    mvpPlanLine.className = 'gantt-marker-line gantt-marker-line--mvp-plan'
+    mvpPlanLine.style.left = `${mvpPlanPct}%`
+    markersOverlay.appendChild(mvpPlanLine)
+  }
+
   const mvpLine = document.createElement('div')
   mvpLine.className = 'gantt-marker-line gantt-marker-line--mvp'
   mvpLine.style.left = `${mvpPct}%`
   markersOverlay.appendChild(mvpLine)
+
+  if (hasDelay && entregaProyectadaPct != null) {
+    const entregaLine = document.createElement('div')
+    entregaLine.className = 'gantt-marker-line gantt-marker-line--projected-end'
+    entregaLine.style.left = `${entregaProyectadaPct}%`
+    markersOverlay.appendChild(entregaLine)
+  }
 
   chartBody.appendChild(rowsTrack)
   chartBody.appendChild(markersOverlay)
@@ -1141,8 +1267,11 @@ function renderGantt(milestones, milestoneActual) {
     <div class="legend-item"><div class="legend-dot bg-lexmel-accent"></div>Atrasada</div>
     <div class="legend-item"><div class="legend-dot bg-muted-foreground/35"></div>Sin iniciar</div>
     <div class="legend-item"><div class="legend-dot w-0.5 rounded-sm bg-destructive"></div>Hoy</div>
-    <div class="legend-item"><div class="legend-dot legend-dot--mvp-line"></div>Primera versión usable del sistema (fin M7)</div>
-  `
+    <div class="legend-item"><div class="legend-dot legend-dot--mvp-line"></div>${MVP_MARKER_LABEL}${hasDelay ? ' (reprogramado)' : ' (fin M7)'}</div>
+    ${hasDelay ? '<div class="legend-item"><div class="legend-dot legend-dot--plan-ghost"></div>Plan contractual</div>' : ''}
+    ${hasDelay ? '<div class="legend-item"><div class="legend-dot legend-dot--projected-end"></div>Entrega proyectada</div>' : ''}
+  `.replace(/div/g, 'div')
+
   wrap.appendChild(legend)
   return wrap
 }
@@ -1311,11 +1440,8 @@ function render(milestones) {
   executive.innerHTML = renderExecutiveSection(insights, rfGlobal, completados, milestones.length, alcance)
   main.appendChild(executive)
 
-  const ganttLabel = document.createElement('div')
-  ganttLabel.className = 'section-label section-label--timeline'
-  ganttLabel.textContent = 'Timeline del proyecto · Ene – Nov 2026'
-  main.appendChild(ganttLabel)
-  main.appendChild(renderGantt(milestones, insights.actual))
+  appendGanttSectionHeader(main, insights.retrasoAcumulado, insights.nuevaFecha)
+  main.appendChild(renderGantt(milestones, insights.actual, insights))
 
   const bottomRf = document.createElement('section')
   bottomRf.className = 'bottom-rf card-padded'
