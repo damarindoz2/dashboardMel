@@ -1062,9 +1062,15 @@ function openModal(ms) {
   document.body.appendChild(overlay)
 }
 
-const MVP_MILESTONE_CODIGO = 'M7'
-const MVP_FECHA_FIN = '2026-09-04'
+/** Fin de M6 = primera versión usable del sistema (fecha contractual desde DB). */
+const MVP_MILESTONE_CODIGO = 'M6'
+const MVP_FECHA_FIN_FALLBACK = '2026-08-07'
 const MVP_MARKER_LABEL = 'Primera versión usable del sistema'
+
+function mvpFechaFinFromMilestones(milestones) {
+  const ms = milestones.find(m => m.codigo === MVP_MILESTONE_CODIGO)
+  return ms?.fecha_fin || MVP_FECHA_FIN_FALLBACK
+}
 
 function positionGanttMarkerLabel(el, pct) {
   el.style.left = `${pct}%`
@@ -1124,9 +1130,10 @@ function renderGantt(milestones, milestoneActual, insights = null) {
 
   const today = getToday()
   const todayPct = ganttPct(today, timeline)
-  const mvpFechaProyectada = hasDelay ? addCalendarDays(MVP_FECHA_FIN, retrasoDias) : MVP_FECHA_FIN
+  const mvpFechaContractual = mvpFechaFinFromMilestones(milestones)
+  const mvpFechaProyectada = hasDelay ? addCalendarDays(mvpFechaContractual, retrasoDias) : mvpFechaContractual
   const mvpPct = ganttPct(mvpFechaProyectada, timeline)
-  const mvpPlanPct = hasDelay ? ganttPct(MVP_FECHA_FIN, timeline) : null
+  const mvpPlanPct = hasDelay ? ganttPct(mvpFechaContractual, timeline) : null
   const entregaProyectadaPct = hasDelay ? ganttPct(timeline.nuevaFecha, timeline) : null
   const todayLabelText = `hoy · ${today.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}`
 
@@ -1267,7 +1274,7 @@ function renderGantt(milestones, milestoneActual, insights = null) {
     <div class="legend-item"><div class="legend-dot bg-lexmel-accent"></div>Atrasada</div>
     <div class="legend-item"><div class="legend-dot bg-muted-foreground/35"></div>Sin iniciar</div>
     <div class="legend-item"><div class="legend-dot w-0.5 rounded-sm bg-destructive"></div>Hoy</div>
-    <div class="legend-item"><div class="legend-dot legend-dot--mvp-line"></div>${MVP_MARKER_LABEL}${hasDelay ? ' (reprogramado)' : ' (fin M7)'}</div>
+    <div class="legend-item"><div class="legend-dot legend-dot--mvp-line"></div>${MVP_MARKER_LABEL}${hasDelay ? ' (reprogramado)' : ` (fin ${MVP_MILESTONE_CODIGO})`}</div>
     ${hasDelay ? '<div class="legend-item"><div class="legend-dot legend-dot--plan-ghost"></div>Plan contractual</div>' : ''}
     ${hasDelay ? '<div class="legend-item"><div class="legend-dot legend-dot--projected-end"></div>Entrega proyectada</div>' : ''}
   `.replace(/div/g, 'div')
