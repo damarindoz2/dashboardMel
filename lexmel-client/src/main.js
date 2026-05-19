@@ -91,6 +91,137 @@ function milestoneEstado(ms) {
   return ms.estadoEfectivo ?? ms.estado
 }
 
+function milestoneNumeroFromCodigo(codigo) {
+  const m = String(codigo || '').match(/\d+/)
+  return m ? m[0] : ''
+}
+
+function renderTrabajandoMilestoneHeading(codigo) {
+  const num = milestoneNumeroFromCodigo(codigo)
+  if (!num) return `<span class="trabajando-ahora-milestone-label">${codigo || 'Milestone'}</span>`
+  return `<span class="trabajando-ahora-milestone-label">Milestone ${num}</span><span class="trabajando-ahora-milestone-ref"> (${codigo})</span>`
+}
+
+/**
+ * Catálogo oficial de módulos del sistema (orden de presentación).
+ * Los entregables en milestones se normalizan a estos ids vía canonicalModuloKey().
+ */
+const MODULOS_SISTEMA = [
+  { id: 'auth_acceso', label: 'Auth y acceso' },
+  { id: 'layout', label: 'Layout' },
+  { id: 'roles_permisos', label: 'Roles y permisos' },
+  { id: 'despachos', label: 'Despachos' },
+  { id: 'sedes', label: 'Sedes' },
+  { id: 'usuarios', label: 'Usuarios' },
+  { id: 'catalogos', label: 'Catálogos' },
+  { id: 'clientes', label: 'Clientes' },
+  { id: 'archivos', label: 'Archivos' },
+  { id: 'tareas', label: 'Tareas' },
+  { id: 'agenda', label: 'Agenda' },
+  { id: 'metricas', label: 'Métricas' },
+  { id: 'garantias', label: 'Garantías' },
+  { id: 'cartera', label: 'Cartera' },
+  { id: 'juicio', label: 'Juicio' },
+  { id: 'dictamenes', label: 'Dictámenes' },
+  { id: 'formato_dictamen', label: 'Formato de dictamen' },
+  { id: 'recordatorios', label: 'Recordatorios' },
+  { id: 'notificaciones', label: 'Notificaciones' },
+  { id: 'chat', label: 'Chat' },
+  { id: 'busqueda', label: 'Búsqueda' },
+  { id: 'papelera', label: 'Papelera' },
+  { id: 'filtros', label: 'Filtros' },
+  { id: 'migraciones', label: 'Migraciones' },
+]
+
+const MODULO_LABEL_BY_ID = Object.fromEntries(MODULOS_SISTEMA.map(m => [m.id, m.label]))
+const MODULO_ORDER = Object.fromEntries(MODULOS_SISTEMA.map((m, i) => [m.id, i]))
+
+/** Entregables de proyecto / QA: no son módulos del sistema. */
+function isEntregableProyecto(lower) {
+  return (
+    /\bqa\b/.test(lower)
+    || lower.includes('correccion')
+    || lower.includes('despliegue')
+    || lower.includes('capacitacion')
+    || lower.includes('documentacion final')
+    || lower.includes('wireframe')
+    || lower.includes('modelo de datos')
+    || lower.includes('mapa de sitio')
+    || lower.includes('diseno ui')
+    || lower === 'ers'
+  )
+}
+
+function stripAccents(value) {
+  return String(value).normalize('NFD').replace(/\p{M}/gu, '')
+}
+
+function canonicalModuloKey(name) {
+  const lower = stripAccents(name.trim().toLowerCase())
+  if (!lower || isEntregableProyecto(lower)) return null
+
+  if (lower.includes('formato') && lower.includes('dictamen')) return 'formato_dictamen'
+  if (lower.includes('dictamen')) return 'dictamenes'
+
+  if (lower.includes('import') || lower.includes('migrac')) return 'migraciones'
+
+  if (lower.includes('login') || lower.includes('sso') || lower.includes('auth') || lower.includes('autentic')) {
+    return 'auth_acceso'
+  }
+  if (lower.includes('layout') || lower.includes('navegacion') || lower.includes('encabezado')) {
+    return 'layout'
+  }
+  if (lower.includes('cartera') || lower.includes('widget') || (lower.includes('dashboard') && lower.includes('widget'))) {
+    return 'cartera'
+  }
+  if (lower.includes('rol') || lower.includes('permiso')) return 'roles_permisos'
+  if (lower.includes('despacho')) return 'despachos'
+  if (lower.includes('sede')) return 'sedes'
+  if (lower.includes('usuario')) return 'usuarios'
+  if (lower.includes('catalogo')) return 'catalogos'
+
+  if (lower.includes('papelera')) return 'papelera'
+  if (lower.includes('filtro')) return 'filtros'
+  if (lower.includes('busqueda')) return 'busqueda'
+
+  if (lower.includes('comentario') && lower.includes('documento')) return 'archivos'
+  if (lower.includes('archivo') || lower.includes('documento') || lower.includes('carpeta')) return 'archivos'
+
+  if (lower.includes('cliente')) return 'clientes'
+  if (lower.includes('tarea')) return 'tareas'
+  if (lower.includes('agenda')) return 'agenda'
+  if (lower.includes('metrica')) return 'metricas'
+  if (lower.includes('garant') || lower.includes('subgarant')) return 'garantias'
+
+  if (lower.includes('recordatorio')) return 'recordatorios'
+  if (lower.includes('notificacion') || lower.includes('alerta') || (lower.includes('correo') && lower.includes('notif'))) {
+    return 'notificaciones'
+  }
+
+  if (lower.includes('chat')) return 'chat'
+
+  if (
+    lower.includes('juicio')
+    || lower.includes('bitacora')
+    || lower.includes('timeline')
+    || (lower.includes('comentario') && !lower.includes('documento'))
+    || (lower.includes('solicitud') && lower.includes('cambio'))
+    || lower.includes('domicilio')
+  ) {
+    return 'juicio'
+  }
+
+  return null
+}
+
+function canonicalModuloLabel(key) {
+  return MODULO_LABEL_BY_ID[key] || key
+}
+
+function sortModuloItems(items) {
+  return [...items].sort((a, b) => (MODULO_ORDER[a.id] ?? 99) - (MODULO_ORDER[b.id] ?? 99))
+}
+
 function estadoKey(estado) {
   const e = (estado || '').toLowerCase()
   if (e === 'entregado' || e === 'completado') return 'done'
@@ -196,7 +327,7 @@ function renderModalRfProgress(stats) {
         <div class="ms-progress-fill ms-progress-fill--done" style="width:${pct}%"></div>
       </div>
       <p class="text-sm text-foreground/80">
-        <strong class="text-foreground">${stats.completado}/${stats.total}</strong> completados en este módulo
+        <strong class="text-foreground">${stats.completado}/${stats.total}</strong> completados en este milestone
       </p>
     </div>
   `
@@ -306,9 +437,28 @@ function computeProjectInsights(milestones, rfGlobal) {
   }
 }
 
-function renderExecutiveSection(insights, rfGlobal, completados, totalMilestones) {
+function renderAlcanceModulosSub(alcance) {
+  if (!alcance.total) {
+    return '<p class="header-metrics-sub">Sin módulos mapeados en milestones con RFs</p>'
+  }
+  const hint = ''
+  if (alcance.atrasados.length) {
+    const names = alcance.atrasados.map(i => i.name).join(', ')
+    return `${hint}<p class="header-metrics-sub header-metrics-sub--late"><strong>Atrasados:</strong> ${names}</p>`
+  }
+  if (alcance.completados.length) {
+    return `${hint}<p class="header-metrics-sub">${alcance.completados.map(i => i.name).join(', ')}</p>`
+  }
+  if (alcance.enProgreso.length) {
+    return `${hint}<p class="header-metrics-sub">En curso: ${alcance.enProgreso.map(i => i.name).join(', ')}</p>`
+  }
+  return `${hint}<p class="header-metrics-sub">Pendientes: ${alcance.pendientes.map(i => i.name).join(', ')}</p>`
+}
+
+function renderExecutiveSection(insights, rfGlobal, completados, totalMilestones, alcance) {
   const { retrasoAcumulado, estadoGeneral, avanceGlobalPct, actual } = insights
-  const modPct = totalMilestones ? Math.round((completados.length / totalMilestones) * 100) : 0
+  const msPct = totalMilestones ? Math.round((completados.length / totalMilestones) * 100) : 0
+  const alcancePct = alcance.total ? Math.round((alcance.completados.length / alcance.total) * 100) : 0
   const entregaFinalStr = fmtDateLong(PROJECT_END)
   const fechaPrincipal = retrasoAcumulado > 0 ? fmtDateLong(insights.nuevaFecha) : entregaFinalStr
   const fechaSub = retrasoAcumulado > 0
@@ -323,12 +473,12 @@ function renderExecutiveSection(insights, rfGlobal, completados, totalMilestones
 
   const trabajandoLeft = actual
     ? `
-      <p class="trabajando-ahora-code">${actual.codigo}</p>
+      <p class="trabajando-ahora-milestone">${renderTrabajandoMilestoneHeading(actual.codigo)}</p>
       <p class="trabajando-ahora-name">${actual.nombre}</p>
       <p class="trabajando-ahora-dates">${fmtDate(actual.fecha_inicio)} → ${fmtDate(actual.fecha_fin)}</p>
       ${days.label ? `<p class="trabajando-ahora-days${days.warn ? ' trabajando-ahora-days--warning' : ''}">${days.label}</p>` : ''}
     `
-    : '<p class="header-metrics-empty">Sin módulo activo en curso.</p>'
+    : '<p class="header-metrics-empty">Sin milestone activo en curso.</p>'
 
   const trabajandoRight = actual && actualStats?.total
     ? `
@@ -338,7 +488,7 @@ function renderExecutiveSection(insights, rfGlobal, completados, totalMilestones
       ${renderMiniProgressBar(actualPct, 'progress')}
     `
     : actual
-      ? '<p class="header-metrics-empty">Sin RFs en este módulo</p>'
+      ? '<p class="header-metrics-empty">Sin RFs en este milestone</p>'
       : ''
 
   return `
@@ -350,11 +500,20 @@ function renderExecutiveSection(insights, rfGlobal, completados, totalMilestones
           ${renderMiniProgressBar(avanceGlobalPct, 'done')}
         </div>
         <div class="header-metrics-cell">
-          <p class="header-metrics-label">Módulos completados</p>
+          <p class="header-metrics-label">Milestones completadas</p>
           <p class="header-metrics-value text-success">
             <strong>${completados.length}</strong><span class="header-metrics-denom"> de ${totalMilestones}</span>
           </p>
-          ${renderMiniProgressBar(modPct, 'done')}
+          ${renderMiniProgressBar(msPct, 'done')}
+          <p class="header-metrics-sub">${completados.map(m => m.codigo).join(', ') || '—'}</p>
+        </div>
+        <div class="header-metrics-cell">
+          <p class="header-metrics-label">Módulos del sistema</p>
+          <p class="header-metrics-value${alcance.atrasados.length ? '' : ' text-success'}">
+            <strong>${alcance.completados.length}</strong><span class="header-metrics-denom"> de ${alcance.catalogoTotal}</span>
+          </p>
+          ${renderMiniProgressBar(alcancePct, alcance.atrasados.length ? 'atrasado' : 'done')}
+          ${renderAlcanceModulosSub(alcance)}
         </div>
         <div class="header-metrics-cell">
           <p class="header-metrics-label">Fecha de entrega final</p>
@@ -367,9 +526,11 @@ function renderExecutiveSection(insights, rfGlobal, completados, totalMilestones
         </div>
       </div>
       <article class="trabajando-ahora-card">
-        <p class="header-metrics-label">Trabajando ahora</p>
         <div class="trabajando-ahora-body">
-          <div class="trabajando-ahora-left">${trabajandoLeft}</div>
+          <div class="trabajando-ahora-left">
+            <p class="trabajando-ahora-title">Trabajando ahora</p>
+            ${trabajandoLeft}
+          </div>
           <div class="trabajando-ahora-right">${trabajandoRight}</div>
         </div>
       </article>
@@ -554,6 +715,171 @@ function parseEntregables(entregablesStr) {
   return String(entregablesStr).split(',').map(e => e.trim()).filter(Boolean)
 }
 
+
+/** Estado agregado de un módulo que aparece en varios milestones. */
+function mergeModuloEstadoKeys(keys) {
+  if (keys.includes('atrasado')) return 'atrasado'
+  if (keys.includes('progress')) return 'progress'
+  if (keys.includes('pending')) return 'pending'
+  if (keys.length && keys.every(k => k === 'done')) return 'done'
+  return 'pending'
+}
+
+/**
+ * Módulos del catálogo sin fila en milestones.entregables: heredan estado del milestone dueño.
+ * Formato de dictamen es módulo (no entregable); sus RFs están en M8.
+ */
+function vincularModulosSinEntregable(milestones, byKey) {
+  const vinculos = [{ id: 'formato_dictamen', milestoneCodigo: 'M8', nota: 'Módulo · M8' }]
+  for (const { id, milestoneCodigo, nota } of vinculos) {
+    const entry = byKey.get(id) ?? {
+      id,
+      name: canonicalModuloLabel(id),
+      keys: [],
+      sources: [],
+    }
+    if (entry.keys.length) continue
+    const ms = milestones.find(m => m.codigo === milestoneCodigo && m.requerimientos?.length)
+    if (!ms) continue
+    entry.keys.push(estadoKey(milestoneEstado(ms)))
+    if (!entry.sources.includes(nota)) entry.sources.push(nota)
+    byKey.set(id, entry)
+  }
+}
+
+/** Módulos del sistema: catálogo MODULOS_SISTEMA + vínculo desde milestones con RFs. */
+function computeAlcanceModulos(milestones) {
+  const byKey = new Map()
+  const rawEntries = []
+  const sinMapear = []
+  const excluidosProyecto = []
+  for (const ms of milestones) {
+    if (!ms.requerimientos?.length) continue
+    const estKey = estadoKey(milestoneEstado(ms))
+    for (const raw of parseEntregables(ms.entregables)) {
+      const original = raw.trim()
+      if (!original) continue
+      const lower = stripAccents(original.toLowerCase())
+      const key = canonicalModuloKey(original)
+      rawEntries.push({ original, key, milestone: ms.codigo, estKey })
+
+      if (isEntregableProyecto(lower)) {
+        excluidosProyecto.push({ original, milestone: ms.codigo })
+        continue
+      }
+      if (!key) {
+        sinMapear.push({ original, milestone: ms.codigo })
+        continue
+      }
+
+      const entry = byKey.get(key)
+      if (!entry) {
+        byKey.set(key, {
+          id: key,
+          name: canonicalModuloLabel(key),
+          keys: [estKey],
+          sources: [original],
+        })
+      } else {
+        entry.keys.push(estKey)
+        if (!entry.sources.includes(original)) entry.sources.push(original)
+      }
+    }
+  }
+
+  vincularModulosSinEntregable(milestones, byKey)
+
+  for (const mod of MODULOS_SISTEMA) {
+    if (!byKey.has(mod.id)) {
+      byKey.set(mod.id, {
+        id: mod.id,
+        name: mod.label,
+        keys: [],
+        sources: [],
+      })
+    }
+  }
+
+  const items = sortModuloItems(
+    [...byKey.values()].map(({ id, name, keys }) => ({
+      id,
+      name,
+      estKey: mergeModuloEstadoKeys(keys),
+    })),
+  )
+
+  return {
+    total: items.length,
+    catalogoTotal: MODULOS_SISTEMA.length,
+    completados: items.filter(i => i.estKey === 'done'),
+    atrasados: items.filter(i => i.estKey === 'atrasado'),
+    enProgreso: items.filter(i => i.estKey === 'progress'),
+    pendientes: items.filter(i => i.estKey === 'pending'),
+    _rawCount: rawEntries.length,
+    _sinMapear: sinMapear,
+    _excluidosProyecto: excluidosProyecto,
+    _canonical: sortModuloItems(
+      [...byKey.values()].map(v => ({
+        id: v.id,
+        label: v.name,
+        sources: v.sources,
+        estKey: mergeModuloEstadoKeys(v.keys),
+      })),
+    ),
+  }
+}
+
+function logAlcanceModulosDebug(alcance) {
+  console.group('[LEXMEL] Módulos del sistema')
+  console.log(`Catálogo oficial: ${alcance.catalogoTotal} módulos`)
+  console.log(`Entregables en milestones con RFs: ${alcance._rawCount}`)
+  console.log(`En alcance (mapeados): ${alcance.total}`)
+  console.table(
+    alcance._canonical.map(c => ({
+      modulo: c.label,
+      id: c.id,
+      estado: c.estKey,
+      aparece_como: c.sources.join(' · '),
+    })),
+  )
+  const sinDb = alcance._canonical.filter(c => !c.sources.length || c.sources.every(s => s.startsWith('Módulo ·')))
+  if (sinDb.length) {
+    console.log('Sin texto en milestones.entregables (solo catálogo / vínculo M8):', sinDb.map(c => c.label).join(', '))
+  }
+  if (alcance._sinMapear.length) {
+    console.warn('Sin mapear (revisar reglas o actualizar DB):')
+    console.table(alcance._sinMapear)
+  }
+  if (alcance._excluidosProyecto.length) {
+    console.log('Excluidos (QA / diseño / despliegue):', alcance._excluidosProyecto.map(e => e.original).join(', '))
+  }
+  console.groupEnd()
+}
+
+function entregableBadgeClass(ms) {
+  const key = estadoKey(milestoneEstado(ms))
+  if (key === 'done') return 'badge badge-rf-completado'
+  if (key === 'atrasado') return 'badge badge-rf-atrasado'
+  if (key === 'progress') return 'badge badge-rf-en-progreso'
+  return 'badge badge-rf-pendiente'
+}
+
+function entregableEstadoLabel(ms) {
+  const key = estadoKey(milestoneEstado(ms))
+  if (key === 'done') return 'Completado'
+  if (key === 'atrasado') return 'Atrasado'
+  if (key === 'progress') return 'En progreso'
+  return 'Sin iniciar'
+}
+
+function entregableTagClass(ms) {
+  const key = estadoKey(milestoneEstado(ms))
+  if (key === 'done') return 'entregable-tag entregable-tag--done'
+  if (key === 'atrasado') return 'entregable-tag entregable-tag--atrasado'
+  if (key === 'progress') return 'entregable-tag entregable-tag--progress'
+  return 'entregable-tag'
+}
+
 function renderEntregablesList(ms) {
   const items = parseEntregables(ms.entregables)
   if (!items.length) {
@@ -563,7 +889,8 @@ function renderEntregablesList(ms) {
     .map(
       e => `
       <li class="rf-item rf-item--entregable">
-        <span class="rf-nombre rf-nombre--full">${e}</span>
+        <span class="rf-nombre">${e}</span>
+        <span class="${entregableBadgeClass(ms)}">${entregableEstadoLabel(ms)}</span>
       </li>
     `,
     )
@@ -636,7 +963,7 @@ function openModal(ms) {
             </div>
           </div>
           <div class="modal-field">
-            <div class="modal-field-label">% de pago</div>
+            <div class="modal-field-label">Porcentaje de pago</div>
             <div class="modal-field-value">${ms.pago ?? '—'}%</div>
           </div>
           <div class="modal-field">
@@ -668,9 +995,9 @@ function openModal(ms) {
         ` : ''}
         ${ms.entregables && ms.requerimientos.length ? `
           <hr class="modal-divider" />
-          <div class="modal-section-label">Entregables</div>
+          <div class="modal-section-label">Alcance en módulos de este milestone</div>
           <div class="modal-entregables">
-            ${parseEntregables(ms.entregables).map(e => `<span class="entregable-tag">${e}</span>`).join('')}
+            ${parseEntregables(ms.entregables).map(e => `<span class="${entregableTagClass(ms)}">${e}</span>`).join('')}
           </div>
         ` : ''}
       </div>
@@ -684,19 +1011,59 @@ function openModal(ms) {
   document.body.appendChild(overlay)
 }
 
+const MVP_MILESTONE_CODIGO = 'M7'
+const MVP_FECHA_FIN = '2026-09-04'
+const MVP_MARKER_LABEL = 'Primera versión usable del sistema'
+
+function positionGanttMarkerLabel(el, pct) {
+  el.style.left = `${pct}%`
+  el.classList.remove('gantt-marker-label--start', 'gantt-marker-label--end')
+  if (pct < 14) el.classList.add('gantt-marker-label--start')
+  else if (pct > 86) el.classList.add('gantt-marker-label--end')
+}
+
+function mvpMilestoneBadgeHtml(codigo) {
+  return codigo === MVP_MILESTONE_CODIGO
+    ? '<span class="ms-mvp-badge">MVP</span>'
+    : ''
+}
+
 function renderGantt(milestones, milestoneActual) {
   const wrap = document.createElement('div')
   wrap.className = 'gantt-wrap gantt-wrap--large'
 
   const today = getToday()
   const todayPct = projectPct(today)
+  const mvpPct = projectPct(MVP_FECHA_FIN)
   const todayLabelText = `hoy · ${today.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}`
+
+  const chartBody = document.createElement('div')
+  chartBody.className = 'gantt-chart-body'
+
+  const labelsRow = document.createElement('div')
+  labelsRow.className = 'gantt-markers-labels'
+  labelsRow.appendChild(document.createElement('div'))
+  const labelsTrack = document.createElement('div')
+  labelsTrack.className = 'gantt-markers-labels-track'
+
+  const todayLabel = document.createElement('div')
+  todayLabel.className = 'gantt-marker-label gantt-marker-label--today'
+  todayLabel.textContent = todayLabelText
+  positionGanttMarkerLabel(todayLabel, todayPct)
+
+  const mvpLabel = document.createElement('div')
+  mvpLabel.className = 'gantt-marker-label gantt-marker-label--mvp'
+  mvpLabel.textContent = MVP_MARKER_LABEL
+  positionGanttMarkerLabel(mvpLabel, mvpPct)
+
+  labelsTrack.appendChild(todayLabel)
+  labelsTrack.appendChild(mvpLabel)
+  labelsRow.appendChild(labelsTrack)
+  chartBody.appendChild(labelsRow)
 
   const monthsRow = document.createElement('div')
   monthsRow.className = 'gantt-months'
-  const labelSpacer = document.createElement('div')
-  monthsRow.appendChild(labelSpacer)
-
+  monthsRow.appendChild(document.createElement('div'))
   const monthsTrack = document.createElement('div')
   monthsTrack.className = 'gantt-months-track'
   MONTH_TICKS.forEach(tick => {
@@ -706,18 +1073,8 @@ function renderGantt(milestones, milestoneActual) {
     el.textContent = tick.label
     monthsTrack.appendChild(el)
   })
-
-  const todayHeader = document.createElement('div')
-  todayHeader.className = 'today-line -translate-x-1/2'
-  todayHeader.style.left = todayPct + '%'
-  const todayHeaderLabel = document.createElement('div')
-  todayHeaderLabel.className = 'today-label'
-  todayHeaderLabel.style.left = todayPct + '%'
-  todayHeaderLabel.textContent = todayLabelText
-  monthsTrack.appendChild(todayHeader)
-  monthsTrack.appendChild(todayHeaderLabel)
   monthsRow.appendChild(monthsTrack)
-  wrap.appendChild(monthsRow)
+  chartBody.appendChild(monthsRow)
 
   const rowsTrack = document.createElement('div')
   rowsTrack.className = 'gantt-rows'
@@ -756,21 +1113,25 @@ function renderGantt(milestones, milestoneActual) {
     row.appendChild(label)
     row.appendChild(gTrack)
     rowsTrack.appendChild(row)
+
   })
 
-  const todayOverlay = document.createElement('div')
-  todayOverlay.className = 'gantt-today-overlay'
-  todayOverlay.style.setProperty('--today-pct', todayPct + '%')
-  const todayLine = document.createElement('div')
-  todayLine.className = 'today-line gantt-today-line'
-  const todayLabel = document.createElement('div')
-  todayLabel.className = 'today-label gantt-today-label'
-  todayLabel.textContent = 'hoy'
-  todayOverlay.appendChild(todayLine)
-  todayOverlay.appendChild(todayLabel)
-  rowsTrack.appendChild(todayOverlay)
+  const markersOverlay = document.createElement('div')
+  markersOverlay.className = 'gantt-markers-overlay'
 
-  wrap.appendChild(rowsTrack)
+  const todayLine = document.createElement('div')
+  todayLine.className = 'gantt-marker-line gantt-marker-line--today'
+  todayLine.style.left = `${todayPct}%`
+  markersOverlay.appendChild(todayLine)
+
+  const mvpLine = document.createElement('div')
+  mvpLine.className = 'gantt-marker-line gantt-marker-line--mvp'
+  mvpLine.style.left = `${mvpPct}%`
+  markersOverlay.appendChild(mvpLine)
+
+  chartBody.appendChild(rowsTrack)
+  chartBody.appendChild(markersOverlay)
+  wrap.appendChild(chartBody)
 
   const legend = document.createElement('div')
   legend.className = 'legend'
@@ -780,6 +1141,7 @@ function renderGantt(milestones, milestoneActual) {
     <div class="legend-item"><div class="legend-dot bg-lexmel-accent"></div>Atrasada</div>
     <div class="legend-item"><div class="legend-dot bg-muted-foreground/35"></div>Sin iniciar</div>
     <div class="legend-item"><div class="legend-dot w-0.5 rounded-sm bg-destructive"></div>Hoy</div>
+    <div class="legend-item"><div class="legend-dot legend-dot--mvp-line"></div>Primera versión usable del sistema (fin M7)</div>
   `
   wrap.appendChild(legend)
   return wrap
@@ -809,6 +1171,7 @@ function appendMilestoneRow(container, ms, { isActual = false } = {}) {
           ${milestoneStatusIcon(est)}
           <div class="ms-row-title">
             <span class="ms-code">${ms.codigo}</span>
+            ${mvpMilestoneBadgeHtml(ms.codigo)}
             <span class="ms-name">${ms.nombre}</span>
           </div>
           ${isActual ? '<span class="ms-actual-tag">Actual</span>' : ''}
@@ -824,7 +1187,7 @@ function appendMilestoneRow(container, ms, { isActual = false } = {}) {
         <span>${ms.semanas ?? '—'} sem</span>
         <span>${ms.pago ?? '—'}% pago</span>
       </div>
-      <button type="button" class="ms-detail-btn">Ver módulo</button>
+      <button type="button" class="ms-detail-btn">Ver milestone</button>
     </summary>
     <div class="ms-row-body">
       ${renderMilestoneItems(ms)}
@@ -941,7 +1304,11 @@ function render(milestones) {
   main.className = 'app-main bg-background'
 
   const executive = document.createElement('div')
-  executive.innerHTML = renderExecutiveSection(insights, rfGlobal, completados, milestones.length)
+  const alcance = computeAlcanceModulos(milestones)
+  if (new URLSearchParams(window.location.search).get('debugModulos') === '1') {
+    logAlcanceModulosDebug(alcance)
+  }
+  executive.innerHTML = renderExecutiveSection(insights, rfGlobal, completados, milestones.length, alcance)
   main.appendChild(executive)
 
   const ganttLabel = document.createElement('div')

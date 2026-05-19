@@ -252,15 +252,11 @@
   }
 
   .header-metrics-card {
-    @apply flex flex-col overflow-hidden rounded-lg bg-card text-card-foreground ring-1 ring-foreground/10 sm:flex-row;
+    @apply grid grid-cols-1 gap-px overflow-hidden rounded-lg bg-border sm:grid-cols-2 xl:grid-cols-4;
   }
 
   .header-metrics-cell {
-    @apply flex flex-1 flex-col px-4 py-3;
-  }
-
-  .header-metrics-cell:not(:last-child) {
-    @apply border-b border-border sm:border-r sm:border-b-0;
+    @apply flex flex-col bg-card px-4 py-3 text-card-foreground;
   }
 
   .header-metrics-label {
@@ -315,6 +311,18 @@
     @apply text-sm text-foreground/70;
   }
 
+  .header-metrics-sub--late {
+    @apply text-lexmel-accent;
+  }
+
+  .header-metrics-sub--late strong {
+    @apply font-semibold;
+  }
+
+  .header-metrics-sub--hint {
+    @apply text-foreground/55;
+  }
+
   .header-metrics-card .ms-progress--mini {
     @apply mt-2 h-1.5 w-full;
   }
@@ -323,20 +331,36 @@
     @apply rounded-lg bg-card px-4 py-3 text-card-foreground ring-1 ring-foreground/10;
   }
 
+  .trabajando-ahora-title {
+    @apply mb-1.5 text-xs font-semibold tracking-wide text-foreground/70 uppercase sm:text-sm;
+  }
+
   .trabajando-ahora-body {
-    @apply mt-2 flex flex-col gap-4 sm:flex-row sm:items-stretch sm:justify-between;
+    @apply flex flex-col gap-4 sm:flex-row sm:items-stretch;
   }
 
   .trabajando-ahora-left {
-    @apply min-w-0 flex-1;
+    @apply flex min-w-0 flex-1 flex-col justify-center;
   }
 
   .trabajando-ahora-right {
-    @apply flex w-full shrink-0 flex-col justify-center sm:max-w-[220px] sm:border-l sm:border-border sm:pl-5;
+    @apply flex w-full shrink-0 flex-col justify-center sm:max-w-[220px] sm:self-stretch sm:border-l sm:border-border sm:pl-5;
   }
 
   .trabajando-ahora-code {
     @apply text-[0.65rem] font-semibold tracking-wider text-muted-foreground uppercase;
+  }
+
+  .trabajando-ahora-milestone {
+    @apply text-sm font-semibold;
+  }
+
+  .trabajando-ahora-milestone-label {
+    @apply text-lexmel-secondary;
+  }
+
+  .trabajando-ahora-milestone-ref {
+    @apply font-normal text-muted-foreground;
   }
 
   .trabajando-ahora-name {
@@ -621,15 +645,90 @@
 
   /* Gantt */
   .gantt-wrap {
-    @apply overflow-x-auto rounded-xl bg-card p-6 text-sm text-card-foreground ring-1 ring-foreground/10;
+    @apply overflow-x-auto overflow-y-visible rounded-xl bg-card p-6 text-sm text-card-foreground ring-1 ring-foreground/10;
   }
 
   .gantt-wrap--large {
     @apply p-8;
   }
 
+  .gantt-chart-body {
+    --gantt-labels-band: 1.75rem;
+    position: relative;
+  }
+
   .section-label--timeline {
     @apply text-sm font-semibold text-foreground;
+  }
+
+  .gantt-markers-labels {
+    @apply relative z-20 mb-0 grid grid-cols-[220px_1fr];
+    min-height: var(--gantt-labels-band);
+  }
+
+  .gantt-markers-labels-track {
+    @apply relative overflow-visible;
+    min-height: var(--gantt-labels-band);
+  }
+
+  .gantt-marker-label {
+    position: absolute;
+    top: auto;
+    bottom: 0;
+    z-index: 21;
+    max-width: min(11rem, 38vw);
+    transform: translateX(-50%);
+    font-size: 0.6rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .gantt-marker-label--start {
+    transform: translateX(0);
+  }
+
+  .gantt-marker-label--end {
+    transform: translateX(-100%);
+  }
+
+  .gantt-marker-label--today {
+    @apply text-destructive;
+  }
+
+  .gantt-marker-label--mvp {
+    max-width: min(10.5rem, 44vw);
+    color: var(--color-text-warning);
+    text-align: center;
+    white-space: normal;
+  }
+
+  .gantt-markers-overlay {
+    pointer-events: none;
+    position: absolute;
+    top: var(--gantt-labels-band);
+    right: 0;
+    bottom: 0;
+    left: 220px;
+    z-index: 10;
+  }
+
+  .gantt-marker-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-50%);
+  }
+
+  .gantt-marker-line--today {
+    width: 2px;
+    border-radius: 1px;
+    background: var(--destructive, #dc2626);
+  }
+
+  .gantt-marker-line--mvp {
+    width: 0;
+    border-left: 2px dashed var(--amber);
   }
 
   .gantt-months {
@@ -638,28 +737,6 @@
 
   .gantt-rows {
     @apply relative grid;
-  }
-
-  .gantt-today-overlay {
-    pointer-events: none;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 220px;
-    z-index: 10;
-  }
-
-  .gantt-today-line {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: var(--today-pct);
-    transform: translateX(-50%);
-  }
-
-  .gantt-today-label {
-    display: none;
   }
 
   .gantt-months-track {
@@ -734,12 +811,11 @@
     @apply bg-muted-foreground/35 text-lexmel-primary;
   }
 
-  .today-line {
-    @apply absolute -top-0.5 -bottom-0.5 z-[5] w-0.5 rounded-sm bg-destructive;
-  }
-
-  .today-label {
-    @apply absolute -top-4 -translate-x-1/2 text-[0.6rem] font-medium tracking-wide whitespace-nowrap text-destructive;
+  .ms-mvp-badge {
+    @apply inline-flex shrink-0 items-center rounded px-1.5 py-px text-[0.58rem] font-bold tracking-wide uppercase;
+    background: var(--color-background-warning);
+    color: var(--color-text-warning);
+    border: 1px solid var(--amber-border);
   }
 
   .legend {
@@ -747,11 +823,22 @@
   }
 
   .legend-item {
-    @apply flex items-center gap-1.5 text-xs text-muted-foreground;
+    @apply flex items-center gap-1.5 overflow-visible text-xs text-muted-foreground;
   }
 
   .legend-dot {
     @apply h-2.5 w-2.5 shrink-0 rounded-sm;
+  }
+
+  .legend-dot.legend-dot--mvp-line {
+    width: 3px;
+    min-width: 3px;
+    height: 0.625rem;
+    border-radius: 0;
+    background: transparent;
+    border: none;
+    border-left: 2px dashed var(--amber);
+    box-sizing: content-box;
   }
 
   /* Milestone rows (horizontal + collapsible) */
@@ -1084,11 +1171,19 @@
   }
 
   .rf-item--entregable {
-    @apply grid-cols-1;
+    @apply grid-cols-[1fr_auto];
   }
 
   .entregables-list .rf-item--entregable {
-    @apply py-2;
+    @apply py-1.5;
+  }
+
+  .rf-item--entregable .rf-nombre {
+    @apply min-w-0;
+  }
+
+  .rf-item--entregable .badge {
+    @apply shrink-0 justify-self-end;
   }
 
   .rf-empty {
@@ -1160,6 +1255,24 @@
     @apply rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground;
   }
 
+  .entregable-tag--done {
+    background: var(--color-background-success);
+    color: var(--color-text-success);
+    border-color: transparent;
+  }
+
+  .entregable-tag--atrasado {
+    background: var(--color-background-danger);
+    color: var(--color-text-danger);
+    border-color: transparent;
+  }
+
+  .entregable-tag--progress {
+    background: var(--color-background-info);
+    color: var(--color-text-info);
+    border-color: transparent;
+  }
+
   /* Loader / error */
   .loader {
     @apply flex h-screen items-center justify-center gap-2;
@@ -1188,7 +1301,20 @@
     grid-template-columns: 140px 1fr;
   }
 
-  .gantt-today-overlay {
+  .gantt-chart-body {
+    --gantt-labels-band: 2rem;
+  }
+
+  .gantt-markers-overlay {
     left: 140px;
+  }
+
+  .gantt-markers-labels {
+    grid-template-columns: 140px 1fr;
+  }
+
+  .gantt-marker-label {
+    max-width: min(9rem, 52vw);
+    font-size: 0.55rem;
   }
 }
