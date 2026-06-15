@@ -222,6 +222,12 @@
     border: 1px solid var(--amber-border);
   }
 
+  .badge-adicional {
+    background: var(--color-background-info);
+    color: var(--color-text-info);
+    border: 1px solid var(--info-border);
+  }
+
   .badge-filter {
     @apply border border-lexmel-accent/50 bg-background text-lexmel-accent;
   }
@@ -862,6 +868,81 @@
     @apply bg-muted-foreground/35 text-lexmel-primary;
   }
 
+  .gantt-row--adicional {
+    @apply mb-1.5;
+  }
+
+  .gantt-label.gantt-label--adicional {
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+  }
+
+  .gantt-adicional-label-wrap {
+    @apply relative cursor-help rounded-md pr-1 outline-none;
+  }
+
+  .gantt-adicional-label-wrap:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--info) 40%, transparent);
+    outline-offset: 2px;
+  }
+
+  .gantt-adicional-tooltip {
+    @apply pointer-events-none invisible absolute top-full left-0 z-50 mt-1.5 w-[min(17rem,calc(100vw-3rem))] rounded-md border border-border bg-card px-3 py-2 text-left text-xs leading-snug font-normal text-foreground/85 opacity-0 shadow-md transition-opacity;
+  }
+
+  .gantt-adicional-tooltip strong {
+    @apply block font-semibold text-foreground;
+  }
+
+  .gantt-adicional-tooltip-meta {
+    @apply mt-1 block text-[0.65rem] text-muted-foreground;
+  }
+
+  .gantt-adicional-label-wrap:hover .gantt-adicional-tooltip,
+  .gantt-adicional-label-wrap:focus-visible .gantt-adicional-tooltip,
+  .gantt-adicional-label-wrap:focus-within .gantt-adicional-tooltip {
+    @apply visible opacity-100;
+  }
+
+  .gantt-label--adicional .gantt-label-name {
+    @apply line-clamp-2 whitespace-normal;
+  }
+
+  .gantt-label--adicional strong {
+    @apply text-sm font-semibold;
+    color: var(--color-text-info);
+  }
+
+  .gantt-adicional-tag {
+    @apply mb-0.5 inline-block rounded px-1.5 py-px text-[0.55rem] font-bold tracking-wide uppercase;
+    background: var(--color-background-info);
+    color: var(--color-text-info);
+    border: 1px solid var(--info-border);
+  }
+
+  .gantt-track--adicional {
+    @apply h-8 bg-muted/50;
+  }
+
+  .gantt-bar--adicional {
+    @apply z-[1] cursor-default border-2 border-dashed shadow-none;
+    border-color: color-mix(in srgb, var(--info) 70%, transparent);
+    background-color: color-mix(in srgb, var(--info) 20%, transparent);
+    color: var(--color-text-info);
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 4px,
+      color-mix(in srgb, var(--info) 8%, transparent) 4px,
+      color-mix(in srgb, var(--info) 8%, transparent) 8px
+    );
+  }
+
+  .gantt-bar--adicional:hover {
+    filter: none;
+  }
+
   .ms-mvp-badge {
     @apply inline-flex shrink-0 items-center rounded px-1.5 py-px text-[0.58rem] font-bold tracking-wide uppercase;
     background: var(--color-background-warning);
@@ -899,6 +980,12 @@
   .legend-dot.legend-dot--projected-end {
     @apply h-2.5 w-0.5 rounded-sm;
     background: color-mix(in srgb, var(--lexmel-accent) 55%, var(--amber));
+  }
+
+  .legend-dot.legend-dot--adicional {
+    @apply h-2.5 w-5 rounded-sm border-2 border-dashed;
+    border-color: color-mix(in srgb, var(--info) 70%, transparent);
+    background: color-mix(in srgb, var(--info) 25%, transparent);
   }
 
   /* Milestone rows (horizontal + collapsible) */
@@ -1216,6 +1303,31 @@
 
   .rf-item {
     @apply grid grid-cols-[52px_1fr_auto] items-center gap-2 border-b border-border px-2.5 py-1.5 text-xs last:border-b-0;
+  }
+
+  .rf-item-badges {
+    @apply flex shrink-0 flex-wrap items-center justify-end gap-1;
+  }
+
+  .rf-item--adicional {
+    background: color-mix(in srgb, var(--info) 5%, transparent);
+  }
+
+  .rf-section-adicional {
+    @apply mt-3 space-y-2;
+  }
+
+  .rf-section-adicional-label {
+    @apply m-0 text-[0.65rem] font-bold tracking-wide uppercase;
+    color: var(--color-text-info);
+  }
+
+  .modal-section-label--adicional {
+    color: var(--color-text-info);
+  }
+
+  .modal-section-hint {
+    @apply -mt-1 mb-3 text-xs leading-snug text-muted-foreground;
   }
 
   .rf-codigo {
