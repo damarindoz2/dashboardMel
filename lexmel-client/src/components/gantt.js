@@ -7,7 +7,6 @@ import {
   ganttBarRange,
 } from '../config/project.js'
 import {
-  MVP_MILESTONE_CODIGO,
   MVP_MARKER_LABEL,
   mvpFechaFinFromMilestones,
 } from '../config/mvp.js'
@@ -272,7 +271,7 @@ export function renderGantt(milestones, milestoneActual, insights = null) {
     <div class="legend-item"><div class="legend-dot bg-lexmel-accent"></div>Atrasada</div>
     <div class="legend-item"><div class="legend-dot bg-muted-foreground/35"></div>Sin iniciar</div>
     <div class="legend-item"><div class="legend-dot w-0.5 rounded-sm bg-destructive"></div>Hoy</div>
-    <div class="legend-item"><div class="legend-dot legend-dot--mvp-line"></div>${MVP_MARKER_LABEL}${hasDelay ? ' (reprogramado)' : ` (fin ${MVP_MILESTONE_CODIGO})`}</div>
+    <div class="legend-item"><div class="legend-dot legend-dot--mvp-line"></div>${MVP_MARKER_LABEL}${hasDelay ? ' (reprogramado)' : ' (18 ago · M7)'}</div>
     ${hasDelay ? '<div class="legend-item"><div class="legend-dot legend-dot--plan-ghost"></div>Plan contractual</div>' : ''}
     ${hasDelay ? '<div class="legend-item"><div class="legend-dot legend-dot--projected-end"></div>Entrega proyectada</div>' : ''}
     ${hasTrabajoAdicional ? '<div class="legend-item"><div class="legend-dot legend-dot--adicional"></div>Trabajo no presupuestado</div>' : ''}

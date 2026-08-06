@@ -1,11 +1,15 @@
-/** Fin de M6 = primera versión usable del sistema (fecha contractual desde DB). */
-export const MVP_MILESTONE_CODIGO = 'M6'
-export const MVP_FECHA_FIN_FALLBACK = '2026-08-07'
-export const MVP_MARKER_LABEL = 'Primera versión usable del sistema'
+/**
+ * Primera versión usable/estable del sistema.
+ * Fecha contractual desacoplada del fin de M6 (reprogramada ≥1 semana).
+ * Cae dentro de M7 (Visualización, Cartera y Timeline).
+ */
+export const MVP_MILESTONE_CODIGO = 'M7'
+export const MVP_FECHA_FIN = '2026-08-18'
+export const MVP_FECHA_FIN_FALLBACK = MVP_FECHA_FIN
+export const MVP_MARKER_LABEL = 'Primera versión estable del sistema'
 
-export function mvpFechaFinFromMilestones(milestones) {
-  const ms = milestones.find(m => m.codigo === MVP_MILESTONE_CODIGO)
-  return ms?.fecha_fin || MVP_FECHA_FIN_FALLBACK
+export function mvpFechaFinFromMilestones(_milestones) {
+  return MVP_FECHA_FIN
 }
 
 export function mvpMilestoneBadgeHtml(codigo) {
